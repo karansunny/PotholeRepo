@@ -5,6 +5,7 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentValues;
 import android.content.Context;
@@ -151,6 +152,32 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     LocationBCReciever receiver;
     IntentFilter intentFilter;
+    BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Toast.makeText(MainActivity.this, "data recieved successful!", Toast.LENGTH_SHORT).show();
+            Log.d(TAG, "data recieved");
+            //displayToast(" Data received");
+            lat_txt = (TextView) findViewById(R.id.lat_txt);
+            long_txt = (TextView) findViewById(R.id.long_txt);
+            String s1 = intent.getStringExtra("latitude");
+            String s2 = intent.getStringExtra("longitud");
+            lat_txt.setText(s1);
+            long_txt.setText(s2);
+        }
+    };
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        startService(new Intent(MainActivity.this, TrackLocationService.class));
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction("android.intent.action.MAIN");
+        registerReceiver(broadcastReceiver, intentFilter);
+    }
+
+
+
 
 
     @Override
@@ -171,8 +198,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         xGyroValue = (TextView) findViewById(R.id.xGyroValue);
         yGyroValue = (TextView) findViewById(R.id.yGyroValue);
         zGyroValue = (TextView) findViewById(R.id.zGyroValue);
-        lat_txt = (TextView) findViewById(R.id.lat_txt);
-        long_txt = (TextView) findViewById(R.id.long_txt);
+
 
         tv_count =  findViewById(R.id.tv_count);
         tv_acc_count =  findViewById(R.id.tv_acc_count);
@@ -217,7 +243,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         setupSensor();
         //setupLocation();
-        startBCReciver();
+        //startBCReciver();
         setupChart();
 
         startTimer();
@@ -241,6 +267,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         });
 
 
+
+
         PotHole.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -258,7 +286,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         });
     }
 
+
     public void startBCReciver() {
+        Log.d(TAG,"on start button1");
 //        receiver = new LocationBCReciever();
 //        intentFilter = new IntentFilter(LocationBCReciever.ACTION_TRACK);
 
@@ -277,26 +307,32 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 //        c.add(Calendar.SECOND, 1);
 //        long afterTenSeconds = c.getTimeInMillis();
         //alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, afterTenSeconds, interval, alarmIntent);
-
+        Log.d(TAG,"on start button2");
         receiver = new LocationBCReciever();
         intentFilter = new IntentFilter(LocationBCReciever.ACTION_TRACK);
         registerReceiver(receiver, intentFilter);
 
         Intent intent = new Intent(LocationBCReciever.ACTION_TRACK);
         sendBroadcast(intent);
+        Log.d(TAG,"on start button4");
     }
+
 
     public void startTimer(){
         Timer timer = new Timer();
-
+        Log.d(TAG,"on start button5");
 
         timer.scheduleAtFixedRate(new TimerTask() {
+
             @Override
             public void run() {
+                Log.d(TAG,"on start button6");
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        Log.d(TAG,"on start button7");
                         if (seconds == 60) {
+                            Log.d(TAG,"on start button3");
                             tv_timer.setText(String.format("%02d", hour) + ":" + String.format("%02d", minutes) + ":" + String.format("%02d", seconds));
                             minutes = seconds / 60;
                             seconds = seconds % 60;
@@ -309,6 +345,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             }
         }, 0, 1000);
     }
+
     public void setupChart(){
         List<Sensor> sensors = mSensorManager.getSensorList(Sensor.TYPE_ALL);
 
@@ -459,13 +496,16 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     @Override
     protected void onResume() {
         super.onResume();
+        //getContext().registerReceiver(broadcastReceiver, new IntentFilter());
 //        receiver = new LocationBCReciever();
 //        intentFilter = new IntentFilter(LocationBCReciever.ACTION_TRACK);
-        registerReceiver(receiver, intentFilter);
+        //registerReceiver(receiver, intentFilter);
 
 //        mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_GAME);
 //        setupSensor();
     }
+
+
 
     @Override
     protected void onDestroy() {
@@ -477,6 +517,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         //thread.interrupt();
         super.onDestroy();
     }
+//    @Override
+//    protected void onStart() {
+//        super.onStart();
+//        IntentFilter intentFilter = new IntentFilter();
+//        intentFilter.addAction("com.example.andy.myapplication");
+//        registerReceiver(broadcastReceiver, intentFilter);
+//    }
 
     public void setupLocation() {
         mlocManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
@@ -617,8 +664,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
                         latitude = Double.toString(location.getLatitude());
                         longitud = Double.toString(location.getLongitude());
-                        lat_txt.setText("" + latitude);
-                        long_txt.setText("" + longitud);
+                        //lat_txt.setText("" + latitude);
+                        //long_txt.setText("" + longitud);
                         checkspeed.setText("" + Double.toString(0.0) + "Km/h");
 
                     } else {

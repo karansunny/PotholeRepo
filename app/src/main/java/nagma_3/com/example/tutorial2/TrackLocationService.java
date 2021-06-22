@@ -1,4 +1,4 @@
-package nagma_3.com.example.tutorial2.workmanager;
+package nagma_3.com.example.tutorial2;
 
 import android.Manifest;
 import android.app.IntentService;
@@ -16,26 +16,20 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
-import androidx.core.app.JobIntentService;
 
 import com.github.mikephil.charting.charts.LineChart;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import nagma_3.com.example.tutorial2.Database.DataBaseHelper;
-import nagma_3.com.example.tutorial2.LocationTrack;
-import nagma_3.com.example.tutorial2.MainActivity;
-import nagma_3.com.example.tutorial2.Utiilties;
-import nagma_3.com.example.tutorial2.model.UserDetailsEntity;
 
 public class TrackLocationService extends IntentService {
 
@@ -105,18 +99,20 @@ public class TrackLocationService extends IntentService {
 
     Context context;
 
+    public TrackLocationService() {
+        super("TrackLocationService");
+
+    }
+
     /**
      * Creates an IntentService.  Invoked by your subclass's constructor.
      *
      * @param name Used to name the worker thread, important only for debugging.
      */
-    public TrackLocationService(String name) {
-        super(name);
-    }
 
     @Override
     public void onCreate() {
-        //super.onCreate();
+        super.onCreate();
         Log.e("Service: ","Started1");
 
         dataBaseHelper = new DataBaseHelper(this);
@@ -126,12 +122,12 @@ public class TrackLocationService extends IntentService {
     }
 
     @Override
-    protected void onHandleIntent(@NonNull Intent intent) {
+    protected void onHandleIntent(Intent intent) {
         Log.e("Service: ","Started From Handle Work");
         Intent intent1 = new Intent();
-        //intent1.setAction("com.example.andy.myapplication");
-        intent1.putExtra("latitude", "Tutorialspoint.com");
-        intent1.putExtra("longitud", "Tutorialspoint.com");
+        intent1.setAction("android.intent.action.MAIN");
+        //intent1.putExtra("latitude", "29");
+        //intent1.putExtra("longitud", "40");
         sendBroadcast(intent1);
 
 
@@ -230,6 +226,7 @@ public class TrackLocationService extends IntentService {
 
                         latitude = Double.toString(location.getLatitude());
                         longitud = Double.toString(location.getLongitude());
+                        Toast.makeText(TrackLocationService.this, "latitude="+latitude+"and longitude="+longitud, Toast.LENGTH_SHORT).show();
                         Log.e("Location: ", "Lat-"+latitude+", Long-"+longitud);
                         if(!isCounterActivated){
                             isCounterActivated = true;
@@ -352,4 +349,5 @@ public class TrackLocationService extends IntentService {
         double distance = R * c * 1000; // convert to meters
         return distance;
     }
+
 }

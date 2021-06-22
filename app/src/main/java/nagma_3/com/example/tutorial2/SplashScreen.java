@@ -61,6 +61,7 @@ public class SplashScreen extends AppCompatActivity {
                 listfiles.setVisibility(View.INVISIBLE);
                 Intent i = new Intent(SplashScreen.this, MainActivity.class);
                 startActivity(i);
+                //startService(new Intent(SplashScreen.this, TrackLocationService.class));
 
             }
         });
