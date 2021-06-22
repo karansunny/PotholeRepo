@@ -108,6 +108,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private ArrayList permissions = new ArrayList();
 
     private final static int ALL_PERMISSIONS_RESULT = 101;
+
     LocationTrack locationTrack;
     private ProgressDialog dialog;
 
