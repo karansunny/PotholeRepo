@@ -11,6 +11,8 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission
+        android:name="android.permission.FORGROUND_SERVICE"/>
 
     <uses-feature android:name="android.hardware.sensor.accelerometer"
         android:required="true" />
@@ -23,7 +25,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
-        <service android:name=".workmanager.TrackLocationService"
+        <service android:name=".TrackLocationService"
             android:enabled="true"
             android:exported="true"
             android:permission="android.permission.BIND_JOB_SERVICE"/>
@@ -54,7 +56,7 @@
         <activity android:name=".DBHandler" />
         <activity android:name=".ActivityD" />
         <activity android:name=".MainActivity" />
-        <service android:name = ".TrackLocationService"/>
+
     </application>
 
 </manifest>

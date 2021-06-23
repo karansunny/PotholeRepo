@@ -161,7 +161,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             lat_txt = (TextView) findViewById(R.id.lat_txt);
             long_txt = (TextView) findViewById(R.id.long_txt);
             String s1 = intent.getStringExtra("latitude");
-            String s2 = intent.getStringExtra("longitud");
+            String s2 = intent.getStringExtra("longitude");
             lat_txt.setText(s1);
             long_txt.setText(s2);
         }
@@ -170,7 +170,19 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     @Override
     protected void onStart() {
         super.onStart();
-        startService(new Intent(MainActivity.this, TrackLocationService.class));
+        //Intent serviceIntent = new Intent(MainActivity.this, TrackLocationService.class);
+        //Log.d(TAG,"accValx from main activity"+accValx);
+        //serviceIntent.putExtra("accValx",accValx);
+        //serviceIntent.putExtra("accValy",accValy);
+        //serviceIntent.putExtra("accValz",accValz);
+        //serviceIntent.putExtra("gyroValx",gyroValx);
+       // serviceIntent.putExtra("gyroValy",gyroValy);
+       // serviceIntent.putExtra("gyroValz",gyroValz);
+        //startService(serviceIntent);
+       // serviceIntent.putExtra("accValx",accValx);
+
+
+        //startService(new Intent(MainActivity.this, TrackLocationService.class));
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction("android.intent.action.MAIN");
         registerReceiver(broadcastReceiver, intentFilter);
@@ -525,7 +537,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 //        registerReceiver(broadcastReceiver, intentFilter);
 //    }
 
-    public void setupLocation() {
+    /*public void setupLocation() {
         mlocManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         locationManager = (LocationManager) getSystemService(Service.LOCATION_SERVICE);
         isGPS = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
@@ -536,7 +548,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         locationManager();
     }
-
+*/
     public void setupSensor() {
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
@@ -595,6 +607,21 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             xGyroValue.setText(String.format("%.3f",sensorEvent.values[0]));
             yGyroValue.setText(String.format("%.3f",sensorEvent.values[1]));
             zGyroValue.setText(String.format("%.3f",sensorEvent.values[2]));
+
+            //Intent intent2 = new Intent();
+            //intent2.setAction("android.intent.action.MAIN");
+            //sendBroadcast(intent2);
+            Intent i = new Intent(MainActivity.this, TrackLocationService.class);
+            Log.d(TAG,"accValx from main activity"+accValx);
+            i.putExtra("accValx",accValx);
+            i.putExtra("accValy",accValy);
+            i.putExtra("accValz",accValz);
+            i.putExtra("gyroValx",gyroValx);
+            i.putExtra("gyroValy",gyroValy);
+            i.putExtra("gyroValz",gyroValz);
+            startService(i);
+           // sendBroadcast(intent2);
+
         }
 
         if (plotData) {
@@ -613,7 +640,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
 
     private void locationManager() {
-        dialog.setMessage("Tracking Location...");
+        //dialog.setMessage("Tracking Location...");
         dialog.show();
 
         //if (GlobalVariables.glocation == null) {
@@ -664,6 +691,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
                         latitude = Double.toString(location.getLatitude());
                         longitud = Double.toString(location.getLongitude());
+                        Log.e(TAG, "onLocationChanged: "+latitude+""+longitud );
                         //lat_txt.setText("" + latitude);
                         //long_txt.setText("" + longitud);
                         checkspeed.setText("" + Double.toString(0.0) + "Km/h");

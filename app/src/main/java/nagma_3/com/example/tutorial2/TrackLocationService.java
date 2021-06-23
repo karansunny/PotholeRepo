@@ -1,6 +1,7 @@
 package nagma_3.com.example.tutorial2;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.IntentService;
 import android.app.ProgressDialog;
 import android.app.Service;
@@ -8,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
+import android.hardware.SensorEvent;
 import android.hardware.SensorManager;
 import android.location.Location;
 import android.location.LocationListener;
@@ -30,11 +32,14 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import nagma_3.com.example.tutorial2.Database.DataBaseHelper;
+import nagma_3.com.example.tutorial2.model.UserDetailsEntity;
 
 public class TrackLocationService extends IntentService {
 
     private static final int JOB_ID = 2;
     private static final int REQUEST_LOCATION = 99;
+    //private static final String TAG = "SplashScreen" ;
+    private static final String TAG = "TrackLocationService" ;
 
     private SensorManager sensorManager;
     Sensor accelerometer, mGyro;
@@ -47,7 +52,8 @@ public class TrackLocationService extends IntentService {
     boolean isNetwork = false;
     boolean canGetLocation = true;
 
-    String latitude, longitud;
+    String latitude;
+    String longitude;
 
     private ArrayList permissionsToRequest;
     private ArrayList permissionsRejected = new ArrayList();
@@ -61,12 +67,12 @@ public class TrackLocationService extends IntentService {
     private final int UPDATE_LATLNG = 2;
     DataBaseHelper dataBaseHelper;
 
-    String accValx = "";
-    String accValy = "";
-    String accValz = "";
-    String gyroValx = "";
-    String gyroValy = "";
-    String gyroValz = "";
+    String accValx ;
+    String accValy ;
+    String accValz ;
+    String gyroValx ;
+    String gyroValy ;
+    String gyroValz ;
 
     int counts;
     long start;
@@ -86,6 +92,22 @@ public class TrackLocationService extends IntentService {
     String speedfinal = "";
     String annotate = "";
 
+
+    // boolean canGetLocation = false;
+
+    Location location; // location
+    // double latitude; // latitude
+    //double longitude; // longitude
+
+    // The minimum distance to change Updates in meters
+    private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 10; // 10 meters
+
+    // The minimum time between updates in milliseconds
+    private static final long MIN_TIME_BW_UPDATES = 1000 * 60 * 1; // 1 minute
+
+    // Declaring a Location Manager
+    //protected LocationManager locationManager;
+
     private SensorManager mSensorManager;
     private Sensor mAccelerometer;
     private Sensor sensors;
@@ -94,7 +116,10 @@ public class TrackLocationService extends IntentService {
     private Thread thread;
     private boolean plotData = true;
     private boolean isCounterActivated = false;
+    boolean isGPSEnabled = false;
 
+    // flag for network status
+    boolean isNetworkEnabled = false;
     ScheduledExecutorService scheduler;
 
     Context context;
@@ -113,38 +138,52 @@ public class TrackLocationService extends IntentService {
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.e("Service: ","Started1");
+        Log.e("Service: ", "Started1");
 
         dataBaseHelper = new DataBaseHelper(this);
-
-        setupLocation();
-        Log.e("Service: ","Started2");
+        long e = dataBaseHelper.deleteSchemeRecord();
+        if(e < 0){
+            Toast.makeText(TrackLocationService.this, "Previous Record  Deleted",Toast.LENGTH_SHORT).show();
+        }else{
+            Toast.makeText(TrackLocationService.this, "Previous Record  Not Deleted",Toast.LENGTH_SHORT).show();
+        }
+        //setupLocation();
+        getLocation();
+        Log.e("Service: ", "Started2");
     }
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        Log.e("Service: ","Started From Handle Work");
+
+        Log.e("Service: ", "Started From Handle Work");
         Intent intent1 = new Intent();
         intent1.setAction("android.intent.action.MAIN");
-        //intent1.putExtra("latitude", "29");
-        //intent1.putExtra("longitud", "40");
+        intent1.putExtra("latitude", latitude);
+        intent1.putExtra("longitude", longitude);
         sendBroadcast(intent1);
+        accValx = intent1.getStringExtra("accValx");
+        Log.d(TAG,"hi"+accValx);
+        accValy = intent1.getStringExtra("accValy");
+        accValz = intent1.getStringExtra("accValz");
+        gyroValx = intent1.getStringExtra("gyroValx");
+        gyroValy = intent1.getStringExtra("gyroValy");
+        gyroValz = intent1.getStringExtra("gyroValz");
+        Toast.makeText(TrackLocationService.this, "data recieved from main activity", Toast.LENGTH_SHORT).show();
+        Log.d(TAG,"data recieved"+accValx+" "+accValy+" "+accValz+" "+gyroValx+" "+gyroValy+" "+gyroValz);
 
 
     }
 
 
-    public static void enqueueWork(Context context, Intent intent)
-    {
+    public static void enqueueWork(Context context, Intent intent) {
         //enqueueWork(context, TrackLocationService.class, JOB_ID, intent);
         //setupLocation(context);
     }
 
     @Override
-    public void onDestroy()
-    {
+    public void onDestroy() {
         Log.e("Stop Service", "onDestroy:MyLoc.Ser");
-        mlocManager.removeUpdates(mlistener);
+        //mlocManager.removeUpdates(mlistener);
 
 //        Intent intent = new Intent(this, TrackLocationService.class);
 //        stopService(intent);
@@ -152,7 +191,7 @@ public class TrackLocationService extends IntentService {
 
     }
 
-    public void startTimer(){
+    public void startTimer() {
 //        Timer timer = new Timer();
 //
 //        timer.scheduleAtFixedRate(new TimerTask() {
@@ -168,13 +207,13 @@ public class TrackLocationService extends IntentService {
                 (new Runnable() {
                     public void run() {
                         // call service
-                        Log.e("Pass Data Lat: ", latitude);
+                        Log.e("Pass Data Lat: ", String.valueOf(latitude));
                     }
                 }, 500, 5, TimeUnit.SECONDS);
     }
 
     public void setupLocation() {
-        Log.e("Service: ","Started3");
+        Log.e("Service: ", "Started3");
         mlocManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         locationManager = (LocationManager) getSystemService(Service.LOCATION_SERVICE);
         isGPS = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
@@ -208,6 +247,159 @@ public class TrackLocationService extends IntentService {
 
     }
 
+    @SuppressLint("MissingPermission")
+    public Location getLocation() {
+        try {
+            Log.d(TAG,"on test1");
+            locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+            //locationManager = (LocationManager)context.getSystemService(LOCATION_SERVICE);
+            Log.d(TAG,"on test11");
+            // getting GPS status
+            isGPSEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+
+            // getting network status
+            isNetworkEnabled = locationManager
+                    .isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+
+            if (!isGPSEnabled && !isNetworkEnabled) {
+                // no network provider is enabled
+            } else {
+                this.canGetLocation = true;
+                // First get location from Network Provider
+                if (isNetworkEnabled) {
+                    Log.d(TAG,"on test111");
+                    locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MIN_TIME_BW_UPDATES, MIN_DISTANCE_CHANGE_FOR_UPDATES,mlistener);
+                    locationManager.requestLocationUpdates(
+                            LocationManager.NETWORK_PROVIDER,
+                            MIN_TIME_BW_UPDATES,
+                            MIN_DISTANCE_CHANGE_FOR_UPDATES,mlistener);
+
+                    Log.d("Network", "Network");
+                    if (locationManager != null) {
+                        Log.d(TAG,"on test1111");
+                      
+                        location = locationManager
+                                .getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+
+                        if (location != null) {
+                            latitude=Double.toString(location.getLatitude());
+                            longitude = Double.toString(location.getLongitude());
+                            Log.d(TAG,"on export button click1"+latitude+""+longitude);
+                        }
+                    }
+                }
+
+                // if GPS Enabled get lat/long using GPS Services
+                if (isGPSEnabled) {
+                    if (location == null) {
+                        locationManager.requestLocationUpdates(
+                                LocationManager.GPS_PROVIDER,
+                                MIN_TIME_BW_UPDATES,
+                                MIN_DISTANCE_CHANGE_FOR_UPDATES,mlistener);
+
+                        Log.d("GPS Enabled", "GPS Enabled");
+                        if (locationManager != null) {
+                            location = locationManager
+                                    .getLastKnownLocation(LocationManager.GPS_PROVIDER);
+
+                            if (location != null) {
+                                latitude = Double.toString(location.getLatitude());
+                                longitude = Double.toString(location.getLongitude());
+                                Log.d(TAG,"on export button click2"+latitude+""+longitude);
+                            }
+                        }
+                    }
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return location;
+    }
+
+   /* public void setupSensor() {
+        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+
+        if (accelerometer != null) {
+            sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+            Log.d(TAG, "onCreate: Registered accelerometer listener");
+
+
+        } else {
+           // xAccValue.setText("Accelerometer Not Supported");
+            //yAccValue.setText("Accelerometer Not Supported");
+            //zAccValue.setText("Accelerometer Not Supported");
+        }
+        mGyro = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
+        if (mGyro != null) {
+            sensorManager.registerListener(this, mGyro, SensorManager.SENSOR_DELAY_NORMAL);
+            Log.d(TAG, "onCreate: Registered Gyro listener");
+        } else {
+            //xGyroValue.setText("Gyroscope Not Supported");
+           // yGyroValue.setText("Gyroscope Not Supported");
+           // zGyroValue.setText("Gyroscope Not Supported");
+        }
+    }
+
+    public void onSensorChanged(SensorEvent sensorEvent) {
+
+        Sensor sensor = sensorEvent.sensor;
+        if (sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+
+            Log.e("SensorDebug", "onSensorChangedAcc: X:" + sensorEvent.values[0] + "Y: " + sensorEvent.values[1] + "Z: " + sensorEvent.values[2]);
+
+            accValx = Double.toString(sensorEvent.values[0]);
+            accValy = Double.toString(sensorEvent.values[1]);
+            accValz = Double.toString(sensorEvent.values[2]);
+
+            insertAccCount += 1;
+            //tv_acc_count.setText(""+insertAccCount);
+
+            //xAccValue.setText(String.format("%.3f",sensorEvent.values[0]));
+            //yAccValue.setText(String.format("%.3f",sensorEvent.values[1]));
+            //zAccValue.setText(String.format("%.3f",sensorEvent.values[2]));
+
+            //Toast.makeText(MainActivity.this, "Record  Inserted",Toast.LENGTH_SHORT).show();
+        } else if (sensor.getType() == Sensor.TYPE_GYROSCOPE) {
+            Log.d(TAG, "onSensorChangedGyro: X:" + sensorEvent.values[0] + "Y: " + sensorEvent.values[1] + "Z: " + sensorEvent.values[2]);
+            gyroValx = Double.toString(sensorEvent.values[0]);
+            gyroValy = Double.toString(sensorEvent.values[0]);
+            gyroValz = Double.toString(sensorEvent.values[0]);
+
+            insertGyroCount += 1;
+            //tv_gyro_count.setText(""+insertGyroCount);
+
+            //xGyroValue.setText(String.format("%.3f",sensorEvent.values[0]));
+           // yGyroValue.setText(String.format("%.3f",sensorEvent.values[1]));
+            //zGyroValue.setText(String.format("%.3f",sensorEvent.values[2]));
+        }
+
+
+    }
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     private final LocationListener mlistener = new LocationListener() {
 
         @Override
@@ -225,9 +417,10 @@ public class TrackLocationService extends IntentService {
 //                        }
 
                         latitude = Double.toString(location.getLatitude());
-                        longitud = Double.toString(location.getLongitude());
-                        Toast.makeText(TrackLocationService.this, "latitude="+latitude+"and longitude="+longitud, Toast.LENGTH_SHORT).show();
-                        Log.e("Location: ", "Lat-"+latitude+", Long-"+longitud);
+                        longitude
+                                = Double.toString(location.getLongitude());
+                        Toast.makeText(TrackLocationService.this, "latitude="+latitude+"and longitude="+longitude, Toast.LENGTH_SHORT).show();
+                        Log.e("Location: ", "Lat-"+latitude+", Long-"+longitude);
                         if(!isCounterActivated){
                             isCounterActivated = true;
                             startTimer();
@@ -294,8 +487,8 @@ public class TrackLocationService extends IntentService {
             }
 
 
-            //UserDetailsEntity record = new UserDetailsEntity(accValx.toString(), accValy.toString(), accValz.toString(), gyroValy.toString(), gyroValz.toString(), gyroValx.toString(), latitude.toString(), longitud.toString(), speedfinal.toString(), annotate.toString());
-//            long c = dataBaseHelper.insertSurfaceUserDetails(record);
+           // UserDetailsEntity record = new UserDetailsEntity(accValx.toString(), accValy.toString(), accValz.toString(), gyroValy.toString(), gyroValz.toString(), gyroValx.toString(), latitude.toString(), longitude.toString(), speedfinal.toString(), annotate.toString());
+            //long c = dataBaseHelper.insertSurfaceUserDetails(record);
             //dataBaseHelper.insertSurfaceUserDetails(record);
             annotate = "";
             insertCount += 1;
