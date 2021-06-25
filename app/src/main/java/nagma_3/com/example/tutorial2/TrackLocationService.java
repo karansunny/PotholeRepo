@@ -148,6 +148,7 @@ public class TrackLocationService extends IntentService {
             //Toast.makeText(TrackLocationService.this, "Previous Record  Not Deleted",Toast.LENGTH_SHORT).show();
         //}
         //setupLocation();
+        dataBaseHelper = new DataBaseHelper(this);
         getLocation();
         Log.e("Service: ", "Started2");
     }
@@ -499,11 +500,11 @@ public class TrackLocationService extends IntentService {
             Log.d(TAG,"Location Count: "+insertCount);
             Log.e("Location Count: ", ""+insertCount);
             //tv_count.setText("I: "+insertCount);
-//            if(c < 0){
-//                Toast.makeText(MainActivity.this, "Record Not Inserted",Toast.LENGTH_SHORT).show();
-//            }else{
-//                Toast.makeText(MainActivity.this, "Record Inserted",Toast.LENGTH_SHORT).show();
-//            }
+            if(c < 0){
+                Toast.makeText(TrackLocationService.this, "Record Not Inserted",Toast.LENGTH_SHORT).show();
+                           }else{
+                Toast.makeText(TrackLocationService.this, "Record Inserted",Toast.LENGTH_SHORT).show();
+            }
         }
 
         @Override

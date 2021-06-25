@@ -235,9 +235,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         Stop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                unregisterReceiver(receiver);
-
+//                unregisterReceiver(receiver);
                 receiver = new LocationBCReciever();
                 intentFilter = new IntentFilter(LocationBCReciever.ACTION_STOP);
                 registerReceiver(receiver, intentFilter);
