@@ -161,13 +161,13 @@ public class TrackLocationService extends IntentService {
         intent1.putExtra("latitude", latitude);
         intent1.putExtra("longitude", longitude);
         sendBroadcast(intent1);
-        accValx = intent1.getStringExtra("accValx");
+        accValx = intent.getStringExtra("accValx");
         Log.d(TAG,"hi"+accValx);
-        accValy = intent1.getStringExtra("accValy");
-        accValz = intent1.getStringExtra("accValz");
-        gyroValx = intent1.getStringExtra("gyroValx");
-        gyroValy = intent1.getStringExtra("gyroValy");
-        gyroValz = intent1.getStringExtra("gyroValz");
+        accValy = intent.getStringExtra("accValy");
+        accValz = intent.getStringExtra("accValz");
+        gyroValx = intent.getStringExtra("gyroValx");
+        gyroValy = intent.getStringExtra("gyroValy");
+        gyroValz = intent.getStringExtra("gyroValz");
         Toast.makeText(TrackLocationService.this, "data recieved from main activity", Toast.LENGTH_SHORT).show();
         Log.d(TAG,"data recieved"+accValx+" "+accValy+" "+accValz+" "+gyroValx+" "+gyroValy+" "+gyroValz);
 
@@ -486,12 +486,17 @@ public class TrackLocationService extends IntentService {
                         .sendToTarget();
             }
 
-
-           // UserDetailsEntity record = new UserDetailsEntity(accValx.toString(), accValy.toString(), accValz.toString(), gyroValy.toString(), gyroValz.toString(), gyroValx.toString(), latitude.toString(), longitude.toString(), speedfinal.toString(), annotate.toString());
-            //long c = dataBaseHelper.insertSurfaceUserDetails(record);
-            //dataBaseHelper.insertSurfaceUserDetails(record);
+            Log.d(TAG,"Nagma1");
+            UserDetailsEntity record = new UserDetailsEntity(accValx.toString(), accValy.toString(), accValz.toString(), gyroValy.toString(), gyroValz.toString(), gyroValx.toString(), latitude.toString(), longitude.toString(), speedfinal.toString(), annotate.toString());
+            Log.d(TAG,"Nagma2");
+            long c = dataBaseHelper.insertSurfaceUserDetails(record);
+            Log.d(TAG,"Nagma3");
+            dataBaseHelper.insertSurfaceUserDetails(record);
+            Log.d(TAG,"Nagma4");
             annotate = "";
+            Log.d(TAG,"Nagma5");
             insertCount += 1;
+            Log.d(TAG,"Location Count: "+insertCount);
             Log.e("Location Count: ", ""+insertCount);
             //tv_count.setText("I: "+insertCount);
 //            if(c < 0){
