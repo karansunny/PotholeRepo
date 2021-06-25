@@ -140,13 +140,13 @@ public class TrackLocationService extends IntentService {
         super.onCreate();
         Log.e("Service: ", "Started1");
 
-        dataBaseHelper = new DataBaseHelper(this);
-        long e = dataBaseHelper.deleteSchemeRecord();
-        if(e < 0){
-            Toast.makeText(TrackLocationService.this, "Previous Record  Deleted",Toast.LENGTH_SHORT).show();
-        }else{
-            Toast.makeText(TrackLocationService.this, "Previous Record  Not Deleted",Toast.LENGTH_SHORT).show();
-        }
+        //dataBaseHelper = new DataBaseHelper(this);
+        //long e = dataBaseHelper.deleteSchemeRecord();
+        //if(e < 0){
+            //Toast.makeText(TrackLocationService.this, "Previous Record  Deleted",Toast.LENGTH_SHORT).show();
+        //}else{
+            //Toast.makeText(TrackLocationService.this, "Previous Record  Not Deleted",Toast.LENGTH_SHORT).show();
+        //}
         //setupLocation();
         getLocation();
         Log.e("Service: ", "Started2");

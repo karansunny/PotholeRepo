@@ -754,12 +754,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             }
 
 
-            UserDetailsEntity record = new UserDetailsEntity(accValx.toString(), accValy.toString(), accValz.toString(), gyroValy.toString(), gyroValz.toString(), gyroValx.toString(), latitude.toString(), longitud.toString(), speedfinal.toString(), annotate.toString());
+           // UserDetailsEntity record = new UserDetailsEntity(accValx.toString(), accValy.toString(), accValz.toString(), gyroValy.toString(), gyroValz.toString(), gyroValx.toString(), latitude.toString(), longitud.toString(), speedfinal.toString(), annotate.toString());
 //            long c = dataBaseHelper.insertSurfaceUserDetails(record);
-            dataBaseHelper.insertSurfaceUserDetails(record);
-            annotate = "";
-            insertCount += 1;
-            tv_count.setText("I: "+insertCount);
+            //dataBaseHelper.insertSurfaceUserDetails(record);
+            //annotate = "";
+           // insertCount += 1;
+            //tv_count.setText("I: "+insertCount);
 //            if(c < 0){
 //                Toast.makeText(MainActivity.this, "Record Not Inserted",Toast.LENGTH_SHORT).show();
 //            }else{
