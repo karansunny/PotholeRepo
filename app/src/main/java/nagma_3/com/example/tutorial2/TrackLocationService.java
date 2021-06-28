@@ -200,7 +200,7 @@ public class TrackLocationService extends IntentService {
 
 
 
-    public void startTimer() {
+    /*public void startTimer() {
 //        Timer timer = new Timer();
 //
 //        timer.scheduleAtFixedRate(new TimerTask() {
@@ -219,7 +219,7 @@ public class TrackLocationService extends IntentService {
                         Log.e("Pass Data Lat: ", String.valueOf(latitude));
                     }
                 }, 500, 5, TimeUnit.SECONDS);
-    }
+    }*/
 
     public void setupLocation() {
         Log.e("Service: ", "Started3");
@@ -432,7 +432,7 @@ public class TrackLocationService extends IntentService {
                         Log.e("Location: ", "Lat-"+latitude+", Long-"+longitude);
                         if(!isCounterActivated){
                             isCounterActivated = true;
-                            startTimer();
+                            //startTimer();
                         }
 //                        lat_txt.setText("" + latitude);
 //                        long_txt.setText("" + longitud);
@@ -593,7 +593,7 @@ public class TrackLocationService extends IntentService {
                 if (!condition) {
                     if (shouldContinue == true) {
                         Toast.makeText(TrackLocationService.this, "check runnable nagmaRecords", Toast.LENGTH_SHORT).show();
-                        handler.postDelayed(this, 1000000);
+                        handler.postDelayed(this, 30000);
                         Log.d(TAG, "check runnable" + condition);
                         UserDetailsEntity record = new UserDetailsEntity(accValx.toString(), accValy.toString(), accValz.toString(), gyroValy.toString(), gyroValz.toString(), gyroValx.toString(), latitude.toString(), longitude.toString(), speedfinal.toString(), annotate.toString());
                         long c = dataBaseHelper.insertSurfaceUserDetails(record);

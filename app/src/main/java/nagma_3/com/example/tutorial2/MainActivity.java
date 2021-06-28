@@ -236,9 +236,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         long e = dataBaseHelper.deleteSchemeRecord();
         if(e < 0){
-               // Toast.makeText(MainActivity.this, "Previous Record  Deleted",Toast.LENGTH_SHORT).show();
+               Toast.makeText(MainActivity.this, "Previous Record  Deleted",Toast.LENGTH_SHORT).show();
             }else{
-                //Toast.makeText(MainActivity.this, "Previous Record  Not Deleted",Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, "Previous Record  Not Deleted",Toast.LENGTH_SHORT).show();
             }
 
 
