@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.location.Location;
 import android.location.LocationListener;
@@ -34,7 +35,7 @@ import java.util.concurrent.TimeUnit;
 import nagma_3.com.example.tutorial2.Database.DataBaseHelper;
 import nagma_3.com.example.tutorial2.model.UserDetailsEntity;
 
-public class TrackLocationService extends IntentService {
+public class TrackLocationService extends IntentService implements SensorEventListener {
     public static volatile boolean shouldContinue = true;
 
     private static final int JOB_ID = 2;
@@ -81,6 +82,7 @@ public class TrackLocationService extends IntentService {
 
     double lat1, lon1, distance, speed, lon2, lat2;
 
+    int locationCount = 0;
     int insertCount = 0;
     int insertAccCount = 0;
     int insertGyroCount = 0;
@@ -149,9 +151,11 @@ public class TrackLocationService extends IntentService {
         //}else{
             //Toast.makeText(TrackLocationService.this, "Previous Record  Not Deleted",Toast.LENGTH_SHORT).show();
         //}
-        //setupLocation();
+
+        setupLocation();
         dataBaseHelper = new DataBaseHelper(this);
-        getLocation();
+        //setupSensor();
+        //getLocation();
         Log.e("Service: ", "Started2");
     }
 
@@ -159,18 +163,18 @@ public class TrackLocationService extends IntentService {
     protected void onHandleIntent(Intent intent) {
         if (shouldContinue == true) {
             Log.e("Service: ", "Started From Handle Work");
-            Intent intent1 = new Intent();
-            intent1.setAction("android.intent.action.MAIN");
-            intent1.putExtra("latitude", latitude);
-            intent1.putExtra("longitude", longitude);
-            sendBroadcast(intent1);
-            accValx = intent.getStringExtra("accValx");
-            Log.d(TAG, "hi" + accValx);
-            accValy = intent.getStringExtra("accValy");
-            accValz = intent.getStringExtra("accValz");
-            gyroValx = intent.getStringExtra("gyroValx");
-            gyroValy = intent.getStringExtra("gyroValy");
-            gyroValz = intent.getStringExtra("gyroValz");
+//            Intent intent1 = new Intent();
+//            intent1.setAction("android.intent.action.MAIN");
+//            intent1.putExtra("latitude", latitude);
+//            intent1.putExtra("longitude", longitude);
+//            sendBroadcast(intent1);
+//            accValx = intent.getStringExtra("accValx");
+//            Log.d(TAG, "hi" + accValx);
+//            accValy = intent.getStringExtra("accValy");
+//            accValz = intent.getStringExtra("accValz");
+//            gyroValx = intent.getStringExtra("gyroValx");
+//            gyroValy = intent.getStringExtra("gyroValy");
+//            gyroValz = intent.getStringExtra("gyroValz");
             //Toast.makeText(TrackLocationService.this, "data recieved from main activity", Toast.LENGTH_SHORT).show();
             Log.d(TAG, "data recieved" + accValx + " " + accValy + " " + accValz + " " + gyroValx + " " + gyroValy + " " + gyroValz);
         }
@@ -257,7 +261,7 @@ public class TrackLocationService extends IntentService {
     }
 
     @SuppressLint("MissingPermission")
-    public Location getLocation() {
+    public Location  getLocation() {
         try {
             Log.d(TAG,"on test1");
             locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
@@ -413,10 +417,13 @@ public class TrackLocationService extends IntentService {
 
         @Override
         public void onLocationChanged(Location location) {
-            Log.e("Service: ","Started5");
+            //Log.e("Service: ","Started5");
 
             if (Utiilties.isGPSEnabled(getApplicationContext())) {
-                Log.e("Location: ", "Location Changed");
+                //Log.e("Location: ", "Location Changed");
+               // locationCount += 1;
+                Log.e("LocationCount: ", ""+ ++locationCount);
+
                 LastLocation = location;
                 if (location.getLatitude() > 0.0) {
                     if (location.getAccuracy() > 0 && location.getAccuracy() < 150) {
@@ -485,19 +492,19 @@ public class TrackLocationService extends IntentService {
 
 
             } else {
-                Message.obtain(
-                        mHandler,
-                        UPDATE_LATLNG,
-                        new DecimalFormat("#.0000000").format(location.getLatitude())
-                                + "-"
-                                + new DecimalFormat("#.0000000").format(location
-                                .getLongitude()) + "-" + location.getAccuracy() + "-" + location.getTime())
-                        .sendToTarget();
+//                Message.obtain(
+//                        mHandler,
+//                        UPDATE_LATLNG,
+//                        new DecimalFormat("#.0000000").format(location.getLatitude())
+//                                + "-"
+//                                + new DecimalFormat("#.0000000").format(location
+//                                .getLongitude()) + "-" + location.getAccuracy() + "-" + location.getTime())
+//                        .sendToTarget();
             }
 
-            Log.d(TAG,"Nagma1");
-            Log.d(TAG,"shouldContinue Value: "+ shouldContinue + "");
-            updatedatabase();
+//            Log.d(TAG,"Nagma1");
+//            Log.d(TAG,"shouldContinue Value: "+ shouldContinue + "");
+            //updatedatabase();
            // scheduler = Executors.newSingleThreadScheduledExecutor();
 
            // scheduler.scheduleAtFixedRate
@@ -595,18 +602,18 @@ public class TrackLocationService extends IntentService {
                         Toast.makeText(TrackLocationService.this, "check runnable nagmaRecords", Toast.LENGTH_SHORT).show();
                         handler.postDelayed(this, 30000);
                         Log.d(TAG, "check runnable" + condition);
-                        UserDetailsEntity record = new UserDetailsEntity(accValx.toString(), accValy.toString(), accValz.toString(), gyroValy.toString(), gyroValz.toString(), gyroValx.toString(), latitude.toString(), longitude.toString(), speedfinal.toString(), annotate.toString());
-                        long c = dataBaseHelper.insertSurfaceUserDetails(record);
-                        dataBaseHelper.insertSurfaceUserDetails(record);
+//                        UserDetailsEntity record = new UserDetailsEntity(accValx.toString(), accValy.toString(), accValz.toString(), gyroValy.toString(), gyroValz.toString(), gyroValx.toString(), latitude.toString(), longitude.toString(), speedfinal.toString(), annotate.toString());
+//                        long c = dataBaseHelper.insertSurfaceUserDetails(record);
+//                        dataBaseHelper.insertSurfaceUserDetails(record);
                         annotate = "";
 
-                        if (c < 0) {
-                            Toast.makeText(TrackLocationService.this, "Record Not Inserted", Toast.LENGTH_SHORT).show();
-                            Log.d(TAG, "Record Not Inserted");
-                        } else {
-                            Toast.makeText(TrackLocationService.this, "Record Inserted", Toast.LENGTH_SHORT).show();
-                            Log.d(TAG, "Record Inserted");
-                        }
+//                        if (c < 0) {
+//                            Toast.makeText(TrackLocationService.this, "Record Not Inserted", Toast.LENGTH_SHORT).show();
+//                            Log.d(TAG, "Record Not Inserted");
+//                        } else {
+//                            Toast.makeText(TrackLocationService.this, "Record Inserted", Toast.LENGTH_SHORT).show();
+//                            Log.d(TAG, "Record Inserted");
+//                        }
                     }
                 }
             }
@@ -635,4 +642,85 @@ public class TrackLocationService extends IntentService {
         return distance;
     }
 
+    public void setupSensor() {
+        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+
+        if (accelerometer != null) {
+            sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+            Log.d(TAG, "onCreate: Registered accelerometer listener");
+
+
+        } else {
+//            xAccValue.setText("Accelerometer Not Supported");
+//            yAccValue.setText("Accelerometer Not Supported");
+//            zAccValue.setText("Accelerometer Not Supported");
+        }
+
+        mGyro = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
+        if (mGyro != null) {
+            sensorManager.registerListener(this, mGyro, SensorManager.SENSOR_DELAY_NORMAL);
+            Log.d(TAG, "onCreate: Registered Gyro listener");
+        } else {
+//            xGyroValue.setText("Gyroscope Not Supported");
+//            yGyroValue.setText("Gyroscope Not Supported");
+//            zGyroValue.setText("Gyroscope Not Supported");
+        }
+    }
+
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        Sensor sensor = event.sensor;
+        if (sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+
+            Log.e("SensorDebug", "onSensorChangedAcc: X:" + event.values[0] + "Y: " + event.values[1] + "Z: " + event.values[2]);
+
+            accValx = Double.toString(event.values[0]);
+            accValy = Double.toString(event.values[1]);
+            accValz = Double.toString(event.values[2]);
+
+            insertAccCount += 1;
+            Log.e("insertAccCount: ",""+insertAccCount);
+//            tv_acc_count.setText(""+insertAccCount);
+//
+//            xAccValue.setText(String.format("%.3f",sensorEvent.values[0]));
+//            yAccValue.setText(String.format("%.3f",sensorEvent.values[1]));
+//            zAccValue.setText(String.format("%.3f",sensorEvent.values[2]));
+
+            //Toast.makeText(MainActivity.this, "Record  Inserted",Toast.LENGTH_SHORT).show();
+        } else if (sensor.getType() == Sensor.TYPE_GYROSCOPE) {
+            Log.d(TAG, "onSensorChangedGyro: X:" + event.values[0] + "Y: " + event.values[1] + "Z: " + event.values[2]);
+//            gyroValx = Double.toString(sensorEvent.values[0]);
+//            gyroValy = Double.toString(sensorEvent.values[0]);
+//            gyroValz = Double.toString(sensorEvent.values[0]);
+
+            insertGyroCount += 1;
+            Log.e("insertGyroCount: ",""+insertGyroCount);
+            //tv_gyro_count.setText(""+insertGyroCount);
+
+//            xGyroValue.setText(String.format("%.3f",sensorEvent.values[0]));
+//            yGyroValue.setText(String.format("%.3f",sensorEvent.values[1]));
+//            zGyroValue.setText(String.format("%.3f",sensorEvent.values[2]));
+
+            //Intent intent2 = new Intent();
+            //intent2.setAction("android.intent.action.MAIN");
+            //sendBroadcast(intent2);
+//            Intent i = new Intent(MainActivity.this, TrackLocationService.class);
+//            Log.d(TAG,"accValx from main activity"+accValx);
+//            i.putExtra("accValx",accValx);
+//            i.putExtra("accValy",accValy);
+//            i.putExtra("accValz",accValz);
+//            i.putExtra("gyroValx",gyroValx);
+//            i.putExtra("gyroValy",gyroValy);
+//            i.putExtra("gyroValz",gyroValz);
+//            startService(i);
+            // sendBroadcast(intent2);
+
+        }
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+    }
 }

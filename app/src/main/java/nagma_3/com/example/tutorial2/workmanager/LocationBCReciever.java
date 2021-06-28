@@ -6,9 +6,11 @@ import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.util.Log;
 import android.widget.Toast;
 
+import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 
 public class LocationBCReciever extends BroadcastReceiver {
@@ -55,9 +57,15 @@ public class LocationBCReciever extends BroadcastReceiver {
         if (ACTION_TRACK.equals(intent.getAction())) {
             Log.e("MyAlarmReceiverALARM--",ACTION_TRACK);
 
-            Intent i = new Intent(context, TrackLocationService.class);
-            i.putExtra("foo", "bar");
-            context.startService(i);
+            Intent i = new Intent(context.getApplicationContext(), TrackLocationService.class);
+            //i.putExtra("foo", "bar");
+            //context.startForegroundService(i);
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                context.startForegroundService(i );
+            } else {
+                context.startService(i );
+            }
 
         }
         else

@@ -1,9 +1,11 @@
 package nagma_3.com.example.tutorial2;
 
+import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.graphics.Color;
@@ -20,6 +22,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -59,8 +62,14 @@ public class SplashScreen extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 listfiles.setVisibility(View.INVISIBLE);
-                Intent i = new Intent(SplashScreen.this, MainActivity.class);
-                startActivity(i);
+
+                if(isPermissionGranted()){
+                    Intent i = new Intent(SplashScreen.this, MainActivity.class);
+                    startActivity(i);
+                }else{
+                    Toast.makeText(SplashScreen.this, "Permission not provided", Toast.LENGTH_SHORT).show();
+                }
+
                 //startService(new Intent(SplashScreen.this, TrackLocationService.class));
 
             }
@@ -102,6 +111,20 @@ public class SplashScreen extends AppCompatActivity {
 
             }
         });
+    }
+
+    public Boolean isPermissionGranted(){
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this,
+                android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]
+                    {android.Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 99);
+            return false;
+//
+//
+//        }else {
+        } else {
+            return true;
+        }
     }
 
 

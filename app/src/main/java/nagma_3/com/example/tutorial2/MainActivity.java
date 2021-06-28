@@ -152,6 +152,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     LocationBCReciever receiver;
     IntentFilter intentFilter;
+
+
     BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -194,11 +196,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
 
         //startService(new Intent(MainActivity.this, TrackLocationService.class));
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction("android.intent.action.MAIN");
-        registerReceiver(broadcastReceiver, intentFilter);
-        registerReceiver(broadcastReceiver, new IntentFilter(Intent.ACTION_SCREEN_ON));
-        registerReceiver(broadcastReceiver, new IntentFilter(Intent.ACTION_SCREEN_OFF));
+//        IntentFilter intentFilter = new IntentFilter();
+//        intentFilter.addAction("android.intent.action.MAIN");
+//        registerReceiver(broadcastReceiver, intentFilter);
+//        registerReceiver(broadcastReceiver, new IntentFilter(Intent.ACTION_SCREEN_ON));
+//        registerReceiver(broadcastReceiver, new IntentFilter(Intent.ACTION_SCREEN_OFF));
     }
 
 
@@ -269,14 +271,21 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         PotHole = (Button) findViewById(R.id.PotHole);
 
-        setupSensor();
+        //setupSensor();
         //setupLocation();
         //startBCReciver();
-        setupChart();
+        //setupChart();
 
         startTimer();
 
-        feedMultiple();
+        //if(isPermissionGranted()){
+        startIntentService();
+//        }else{
+//            Toast.makeText(this, "Permission not provided", Toast.LENGTH_SHORT).show();
+//        }
+
+
+        //feedMultiple();
 
         SpeedBreaker.setOnClickListener(new View.OnClickListener() {
 
@@ -314,10 +323,22 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         });
     }
 
+    public void startIntentService(){
+        Intent i = new Intent(MainActivity.this, TrackLocationService.class);
+        Log.d(TAG,"accValx from main activity"+accValx);
+//        i.putExtra("accValx",accValx);
+//        i.putExtra("accValy",accValy);
+//        i.putExtra("accValz",accValz);
+//        i.putExtra("gyroValx",gyroValx);
+//        i.putExtra("gyroValy",gyroValy);
+//        i.putExtra("gyroValz",gyroValz);
+        startService(i);
+    }
+
 
     public void startBCReciver() {
-        Log.d(TAG,"on start button1");
-//        receiver = new LocationBCReciever();
+       // Log.d(TAG,"/tton1");
+//        receiver = new Locat/eciever();
 //        intentFilter = new IntentFilter(LocationBCReciever.ACTION_TRACK);
 
 //        Intent intentToFire = new Intent();
@@ -335,32 +356,28 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 //        c.add(Calendar.SECOND, 1);
 //        long afterTenSeconds = c.getTimeInMillis();
         //alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, afterTenSeconds, interval, alarmIntent);
-        Log.d(TAG,"on start button2");
+        //Log.d(TAG,"on start button2");
         receiver = new LocationBCReciever();
         intentFilter = new IntentFilter(LocationBCReciever.ACTION_TRACK);
         registerReceiver(receiver, intentFilter);
 
         Intent intent = new Intent(LocationBCReciever.ACTION_TRACK);
         sendBroadcast(intent);
-        Log.d(TAG,"on start button4");
+        //Log.d(TAG,"on start button4");
     }
 
 
     public void startTimer(){
         Timer timer = new Timer();
-        Log.d(TAG,"on start button5");
 
         timer.scheduleAtFixedRate(new TimerTask() {
 
             @Override
             public void run() {
-                Log.d(TAG,"on start button6");
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        Log.d(TAG,"on start button7");
                         if (seconds == 60) {
-                            Log.d(TAG,"on start button3");
                             tv_timer.setText(String.format("%02d", hour) + ":" + String.format("%02d", minutes) + ":" + String.format("%02d", seconds));
                             minutes = seconds / 60;
                             seconds = seconds % 60;
@@ -525,10 +542,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     @Override
     protected void onResume() {
         super.onResume();
-        //getContext().registerReceiver(broadcastReceiver, new IntentFilter());
+        //registerReceiver(broadcastReceiver, new IntentFilter());
 //        receiver = new LocationBCReciever();
 //        intentFilter = new IntentFilter(LocationBCReciever.ACTION_TRACK);
-        //registerReceiver(receiver, intentFilter);
+//        registerReceiver(receiver, intentFilter);
 
 //        mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_GAME);
 //        setupSensor();
@@ -538,7 +555,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     @Override
     protected void onDestroy() {
-//        unregisterReceiver(receiver);
+        //unregisterReceiver(receiver);
 
 //        mlocManager.removeUpdates(mlistener);
 //        mSensorManager.unregisterListener(MainActivity.this);
@@ -580,6 +597,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             yAccValue.setText("Accelerometer Not Supported");
             zAccValue.setText("Accelerometer Not Supported");
         }
+
         mGyro = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
         if (mGyro != null) {
             sensorManager.registerListener(this, mGyro, SensorManager.SENSOR_DELAY_NORMAL);
@@ -676,6 +694,20 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         }
 
+    }
+
+    public Boolean isPermissionGranted(){
+        if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(MainActivity.this,
+                Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]
+                    {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, REQUEST_LOCATION);
+            return false;
+//
+//
+//        }else {
+        } else {
+            return true;
+        }
     }
 
     private void updateUILocation(Location location) {
