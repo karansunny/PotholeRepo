@@ -155,7 +155,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Toast.makeText(MainActivity.this, "data recieved successful!", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(MainActivity.this, "data recieved successful!", Toast.LENGTH_SHORT).show();
             Log.d(TAG, "data recieved");
             //displayToast(" Data received");
             lat_txt = (TextView) findViewById(R.id.lat_txt);
@@ -164,6 +164,17 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             String s2 = intent.getStringExtra("longitude");
             lat_txt.setText(s1);
             long_txt.setText(s2);
+
+            //if(intent.getAction().equals(Intent.ACTION_SCREEN_ON)){
+                //Log.i("[BroadcastReceiver]", "Screen ON");
+                //String s1 = intent.getStringExtra("latitude");
+                //String s2 = intent.getStringExtra("longitude");
+            //}
+            //else if(intent.getAction().equals(Intent.ACTION_SCREEN_OFF)){
+                //Log.i("[BroadcastReceiver]", "Screen OFF");
+            //}
+
+
         }
     };
 
@@ -186,6 +197,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction("android.intent.action.MAIN");
         registerReceiver(broadcastReceiver, intentFilter);
+        registerReceiver(broadcastReceiver, new IntentFilter(Intent.ACTION_SCREEN_ON));
+        registerReceiver(broadcastReceiver, new IntentFilter(Intent.ACTION_SCREEN_OFF));
     }
 
 
@@ -223,9 +236,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         long e = dataBaseHelper.deleteSchemeRecord();
         if(e < 0){
-                Toast.makeText(MainActivity.this, "Previous Record  Deleted",Toast.LENGTH_SHORT).show();
+               // Toast.makeText(MainActivity.this, "Previous Record  Deleted",Toast.LENGTH_SHORT).show();
             }else{
-                Toast.makeText(MainActivity.this, "Previous Record  Not Deleted",Toast.LENGTH_SHORT).show();
+                //Toast.makeText(MainActivity.this, "Previous Record  Not Deleted",Toast.LENGTH_SHORT).show();
             }
 
 
@@ -243,6 +256,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 Intent intent = new Intent(LocationBCReciever.ACTION_STOP);
                 sendBroadcast(intent);
                 //unregisterReceiver(receiver);
+                Intent i = new Intent(MainActivity.this, TrackLocationService.class);
+                TrackLocationService.shouldContinue = false;
+                //Log.d(TAG,"shouldContinue Value: "+ TrackLocationService.shouldContinue + "");
+                //Intent intent=new Intent(this,MyService.class);
+                //stopService(i);
                 finish();
 
             }
@@ -258,7 +276,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         startTimer();
 
-        //feedMultiple();
+        feedMultiple();
 
         SpeedBreaker.setOnClickListener(new View.OnClickListener() {
 
@@ -267,9 +285,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 // TODO Auto-generated method stub
                 annotate = "Speedbreaker";
                 if (annotate == "") {
-                    Toast.makeText(MainActivity.this, "Annotation Not Inserted", Toast.LENGTH_SHORT).show();
+                   // Toast.makeText(MainActivity.this, "Annotation Not Inserted", Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(MainActivity.this, "Annotation Inserted", Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(MainActivity.this, "Annotation Inserted", Toast.LENGTH_SHORT).show();
                 }
 
             }
@@ -286,9 +304,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 // TODO Auto-generated method stub
                 annotate = "Pothole";
                 if (annotate == "") {
-                    Toast.makeText(MainActivity.this, "Annotation Not Inserted", Toast.LENGTH_SHORT).show();
+                   // Toast.makeText(MainActivity.this, "Annotation Not Inserted", Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(MainActivity.this, "Annotation Inserted", Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(MainActivity.this, "Annotation Inserted", Toast.LENGTH_SHORT).show();
                 }
 
             }
@@ -493,6 +511,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     @Override
     protected void onPause() {
+        //unregisterReceiver(receiver);
         super.onPause();
 
         if (thread != null) {
@@ -519,7 +538,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     @Override
     protected void onDestroy() {
-        unregisterReceiver(receiver);
+//        unregisterReceiver(receiver);
 
 //        mlocManager.removeUpdates(mlistener);
 //        mSensorManager.unregisterListener(MainActivity.this);
@@ -896,12 +915,17 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
 
 
-//    @Override
-//    protected void onStop() {
-//        super.onStop();
+    @Override
+    protected void onStop() {
+//        unregisterReceiver(receiver);
+        //unregisterReceiver(broadcastReceiver);
+        super.onStop();
+        //locationTrack.stopSelf();
+        //unregisterReceiver(receiver);
+        //unregisterReceiver(broadcastReceiver);
 //
 //
-//    }
+    }
 }
 
 

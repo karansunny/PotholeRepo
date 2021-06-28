@@ -35,6 +35,7 @@ import nagma_3.com.example.tutorial2.Database.DataBaseHelper;
 import nagma_3.com.example.tutorial2.model.UserDetailsEntity;
 
 public class TrackLocationService extends IntentService {
+    public static volatile boolean shouldContinue = true;
 
     private static final int JOB_ID = 2;
     private static final int REQUEST_LOCATION = 99;
@@ -43,7 +44,8 @@ public class TrackLocationService extends IntentService {
 
     private SensorManager sensorManager;
     Sensor accelerometer, mGyro;
-
+    private Handler handler;
+    private Runnable run;
     LocationManager locationManager;
     LocationManager mlocManager = null;
 
@@ -51,7 +53,7 @@ public class TrackLocationService extends IntentService {
     boolean isGPS = false;
     boolean isNetwork = false;
     boolean canGetLocation = true;
-
+    Boolean condition=false;
     String latitude;
     String longitude;
 
@@ -155,22 +157,26 @@ public class TrackLocationService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
-
-        Log.e("Service: ", "Started From Handle Work");
-        Intent intent1 = new Intent();
-        intent1.setAction("android.intent.action.MAIN");
-        intent1.putExtra("latitude", latitude);
-        intent1.putExtra("longitude", longitude);
-        sendBroadcast(intent1);
-        accValx = intent.getStringExtra("accValx");
-        Log.d(TAG,"hi"+accValx);
-        accValy = intent.getStringExtra("accValy");
-        accValz = intent.getStringExtra("accValz");
-        gyroValx = intent.getStringExtra("gyroValx");
-        gyroValy = intent.getStringExtra("gyroValy");
-        gyroValz = intent.getStringExtra("gyroValz");
-        Toast.makeText(TrackLocationService.this, "data recieved from main activity", Toast.LENGTH_SHORT).show();
-        Log.d(TAG,"data recieved"+accValx+" "+accValy+" "+accValz+" "+gyroValx+" "+gyroValy+" "+gyroValz);
+        if (shouldContinue == true) {
+            Log.e("Service: ", "Started From Handle Work");
+            Intent intent1 = new Intent();
+            intent1.setAction("android.intent.action.MAIN");
+            intent1.putExtra("latitude", latitude);
+            intent1.putExtra("longitude", longitude);
+            sendBroadcast(intent1);
+            accValx = intent.getStringExtra("accValx");
+            Log.d(TAG, "hi" + accValx);
+            accValy = intent.getStringExtra("accValy");
+            accValz = intent.getStringExtra("accValz");
+            gyroValx = intent.getStringExtra("gyroValx");
+            gyroValy = intent.getStringExtra("gyroValy");
+            gyroValz = intent.getStringExtra("gyroValz");
+            //Toast.makeText(TrackLocationService.this, "data recieved from main activity", Toast.LENGTH_SHORT).show();
+            Log.d(TAG, "data recieved" + accValx + " " + accValy + " " + accValz + " " + gyroValx + " " + gyroValy + " " + gyroValz);
+        }
+        else{
+            stophandler();
+        }
 
 
     }
@@ -191,6 +197,8 @@ public class TrackLocationService extends IntentService {
         super.onDestroy();
 
     }
+
+
 
     public void startTimer() {
 //        Timer timer = new Timer();
@@ -420,7 +428,7 @@ public class TrackLocationService extends IntentService {
                         latitude = Double.toString(location.getLatitude());
                         longitude
                                 = Double.toString(location.getLongitude());
-                        Toast.makeText(TrackLocationService.this, "latitude="+latitude+"and longitude="+longitude, Toast.LENGTH_SHORT).show();
+                        //Toast.makeText(TrackLocationService.this, "latitude="+latitude+"and longitude="+longitude, Toast.LENGTH_SHORT).show();
                         Log.e("Location: ", "Lat-"+latitude+", Long-"+longitude);
                         if(!isCounterActivated){
                             isCounterActivated = true;
@@ -488,23 +496,61 @@ public class TrackLocationService extends IntentService {
             }
 
             Log.d(TAG,"Nagma1");
-            UserDetailsEntity record = new UserDetailsEntity(accValx.toString(), accValy.toString(), accValz.toString(), gyroValy.toString(), gyroValz.toString(), gyroValx.toString(), latitude.toString(), longitude.toString(), speedfinal.toString(), annotate.toString());
-            Log.d(TAG,"Nagma2");
-            long c = dataBaseHelper.insertSurfaceUserDetails(record);
-            Log.d(TAG,"Nagma3");
-            dataBaseHelper.insertSurfaceUserDetails(record);
-            Log.d(TAG,"Nagma4");
-            annotate = "";
-            Log.d(TAG,"Nagma5");
-            insertCount += 1;
-            Log.d(TAG,"Location Count: "+insertCount);
-            Log.e("Location Count: ", ""+insertCount);
-            //tv_count.setText("I: "+insertCount);
-            if(c < 0){
-                Toast.makeText(TrackLocationService.this, "Record Not Inserted",Toast.LENGTH_SHORT).show();
-                           }else{
-                Toast.makeText(TrackLocationService.this, "Record Inserted",Toast.LENGTH_SHORT).show();
-            }
+            Log.d(TAG,"shouldContinue Value: "+ shouldContinue + "");
+            updatedatabase();
+           // scheduler = Executors.newSingleThreadScheduledExecutor();
+
+           // scheduler.scheduleAtFixedRate
+                    //(new Runnable() {
+                        //public void run() {
+                            // call service
+                            //Log.e("Pass Data Lat: ", String.valueOf(latitude));
+                           // if (shouldContinue == true) {
+                               // UserDetailsEntity record = new UserDetailsEntity(accValx.toString(), accValy.toString(), accValz.toString(), gyroValy.toString(), gyroValz.toString(), gyroValx.toString(), latitude.toString(), longitude.toString(), speedfinal.toString(), annotate.toString());
+                                //Log.d(TAG, "Nagma2");
+                               // long c = dataBaseHelper.insertSurfaceUserDetails(record);
+                                //Log.d(TAG, "Nagma3");
+                               // dataBaseHelper.insertSurfaceUserDetails(record);
+                                //Log.d(TAG, "Nagma4");
+                                //annotate = "";
+                                //Log.d(TAG, "Nagma5");
+                                //insertCount += 1;
+                               // Log.d(TAG, "Location Count: " + insertCount);
+                               // Log.e("Location Count: ", "" + insertCount);
+                                //tv_count.setText("I: "+insertCount);
+
+                                //if (c < 0) {
+                                    //Toast.makeText(TrackLocationService.this, "Record Not Inserted", Toast.LENGTH_SHORT).show();
+                                   //Log.d(TAG, "Record Not Inserted");
+                                //} else {
+                                    //Toast.makeText(TrackLocationService.this, "Record Inserted", Toast.LENGTH_SHORT).show();
+                                   //Log.d(TAG, "Record Inserted");
+                               // }
+                           // }
+                       // }
+                   // }, 300, 3, TimeUnit.SECONDS);
+           // if (shouldContinue == true) {
+               // UserDetailsEntity record = new UserDetailsEntity(accValx.toString(), accValy.toString(), accValz.toString(), gyroValy.toString(), gyroValz.toString(), gyroValx.toString(), latitude.toString(), longitude.toString(), speedfinal.toString(), annotate.toString());
+               // Log.d(TAG, "Nagma2");
+                //long c = dataBaseHelper.insertSurfaceUserDetails(record);
+                //Log.d(TAG, "Nagma3");
+                //dataBaseHelper.insertSurfaceUserDetails(record);
+                //Log.d(TAG, "Nagma4");
+                //annotate = "";
+                //Log.d(TAG, "Nagma5");
+               // insertCount += 1;
+               // Log.d(TAG, "Location Count: " + insertCount);
+                //Log.e("Location Count: ", "" + insertCount);
+                //tv_count.setText("I: "+insertCount);
+
+                //if (c < 0) {
+                    //Toast.makeText(TrackLocationService.this, "Record Not Inserted", Toast.LENGTH_SHORT).show();
+                   // Log.d(TAG, "Record Not Inserted");
+                //} else {
+                    //Toast.makeText(TrackLocationService.this, "Record Inserted", Toast.LENGTH_SHORT).show();
+                   // Log.d(TAG, "Record Inserted");
+               // }
+            //}
         }
 
         @Override
@@ -537,6 +583,46 @@ public class TrackLocationService extends IntentService {
             }
         }
     };
+
+    private void updatedatabase() {
+
+        handler = new Handler();
+        run = new Runnable() {
+            @Override
+            public void run() {
+                if (!condition) {
+                    if (shouldContinue == true) {
+                        Toast.makeText(TrackLocationService.this, "check runnable nagmaRecords", Toast.LENGTH_SHORT).show();
+                        handler.postDelayed(this, 1000000);
+                        Log.d(TAG, "check runnable" + condition);
+                        UserDetailsEntity record = new UserDetailsEntity(accValx.toString(), accValy.toString(), accValz.toString(), gyroValy.toString(), gyroValz.toString(), gyroValx.toString(), latitude.toString(), longitude.toString(), speedfinal.toString(), annotate.toString());
+                        long c = dataBaseHelper.insertSurfaceUserDetails(record);
+                        dataBaseHelper.insertSurfaceUserDetails(record);
+                        annotate = "";
+
+                        if (c < 0) {
+                            Toast.makeText(TrackLocationService.this, "Record Not Inserted", Toast.LENGTH_SHORT).show();
+                            Log.d(TAG, "Record Not Inserted");
+                        } else {
+                            Toast.makeText(TrackLocationService.this, "Record Inserted", Toast.LENGTH_SHORT).show();
+                            Log.d(TAG, "Record Inserted");
+                        }
+                    }
+                }
+            }
+        };
+        handler.post(run);
+    }
+
+    public void stophandler()
+    {
+        //Toast.makeText(MainActivity.this, "stop runnable", Toast.LENGTH_SHORT).show();
+        condition=true;
+        Log.d(TAG, "stop runnable" + condition);
+    }
+
+
+
 
     public double measureDistance(Double lat1, Double lat2, Double lon1, Double lon2) {//custom method that calculates distance between two points
         //formula found on the web
